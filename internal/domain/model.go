@@ -11,6 +11,7 @@ type Orang struct {
 }
 
 type Buku struct {
+	ID    int
 	Judul string
-	Stock int
+	Stok  int
 }
