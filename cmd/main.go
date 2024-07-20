@@ -22,7 +22,7 @@ func main() {
 	personHandler := handler.NewPersonHandler(personUsecase)
 
 	loanRepo := repository.NewLoanRepository()
-	loanUsecase := usecase.NewLoanUsecase(loanRepo)
+	loanUsecase := usecase.NewLoanUsecase(loanRepo, bookRepo, personRepo)
 	loanHandler := handler.NewLoanHandler(loanUsecase)
 
 	reader := bufio.NewReader(os.Stdin)
