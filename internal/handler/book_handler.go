@@ -47,7 +47,7 @@ func (h BookHandler) DeleteBook(book domain.Book) error {
 		return err
 	}
 
-	return validateBook(book)
+	return nil
 }
 
 func (h BookHandler) ListBooks() []domain.Book {
