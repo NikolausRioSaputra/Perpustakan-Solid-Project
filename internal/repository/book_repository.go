@@ -11,6 +11,7 @@ type BookRepositoryInterface interface {
 	BookUpdater
 	BookDeleter
 	BookLister
+	BookChecker
 }
 
 // ini interface implementasi di repo untuk nyimpan buku
@@ -31,6 +32,10 @@ type BookDeleter interface {
 // ini interface untuk implementasi d repo untuk tampilkan semua buku
 type BookLister interface {
 	ListBooks() []domain.Book
+}
+
+type BookChecker interface {
+	IsBookExists(bookID int) bool
 }
 
 // ini kita buat untuk nyimpan fungsi bookrepositoryinterface dengan map yang di simpan di dengan books
@@ -75,11 +80,16 @@ func (repo *BookRepository) DeleteBook(bookID int) error {
 	return nil
 }
 
-func (repo *BookRepository) ListBooks() ([]domain.Book) {
+func (repo *BookRepository) ListBooks() []domain.Book {
 	books := []domain.Book{}
 	for _,book := range repo.books {
 		books = append(books, book)
 	}
 
 	return books
+}
+
+func (repo *BookRepository) IsBookExists(bookID int) bool {
+	_, exists := repo.books[bookID]
+	return exists
 }

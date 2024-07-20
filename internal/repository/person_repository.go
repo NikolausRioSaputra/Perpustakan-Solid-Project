@@ -10,6 +10,7 @@ type PersonRepositoryInterface interface {
 	PersonUpdate
 	PersonDelete
 	PersonLister
+	PersonChecker
 }
 
 type PersonSaver interface {
@@ -26,6 +27,10 @@ type PersonDelete interface {
 
 type PersonLister interface {
 	ListPersons() []domain.Person
+}
+
+type PersonChecker interface {
+	IsPersonExists(personID int) bool
 }
 
 type PersonRepository struct {
@@ -74,4 +79,9 @@ func (repo *PersonRepository) ListPersons() []domain.Person {
 		persons = append(persons, person)
 	}
 	return persons
+}
+
+func (repo *PersonRepository) IsPersonExists(personID int) bool {
+	_, exists := repo.persons[personID]
+	return exists
 }

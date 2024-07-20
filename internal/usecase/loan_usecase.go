@@ -3,6 +3,7 @@ package usecase
 import (
 	"Project_Niko/internal/domain"
 	"Project_Niko/internal/repository"
+	"errors"
 )
 
 type LoanUsecaseInterface interface {
@@ -36,16 +37,28 @@ type CheckLoan interface {
 
 type LoanUsecase struct {
 	loanRepo repository.LoanRepositoryInterface
+	bookRepo   repository.BookRepositoryInterface
+	personRepo repository.PersonRepositoryInterface
 }
 
-func NewLoanUsecase(loanRepo repository.LoanRepositoryInterface) LoanUsecaseInterface {
+func NewLoanUsecase(loanRepo repository.LoanRepositoryInterface, bookRepo repository.BookRepositoryInterface, personRepo repository.PersonRepositoryInterface) LoanUsecaseInterface {
 	return &LoanUsecase{
 		loanRepo: loanRepo,
+		bookRepo:   bookRepo,
+		personRepo: personRepo,
 	}
 }
 
 // AddLoan implements LoanUsecaseInterface.
 func (uc *LoanUsecase) AddLoan(loan domain.Loan) error {
+	if !uc.bookRepo.IsBookExists(loan.Book.ID) {
+		return errors.New("book does not exist")
+	}
+
+	if !uc.personRepo.IsPersonExists(loan.Person.ID) {
+		return errors.New("person does not exist")
+	}
+
 	err := uc.loanRepo.SaveLoan(&loan)
 	if err != nil {
 		return err
