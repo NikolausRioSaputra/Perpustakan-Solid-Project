@@ -58,7 +58,7 @@ func (uc *LoanUsecase) AddLoan(loan domain.Loan) error {
 	if !uc.personRepo.IsPersonExists(loan.Person.ID) {
 		return errors.New("person does not exist")
 	}
-	
+
 	err := uc.loanRepo.SaveLoan(&loan)
 	if err != nil {
 		return err
