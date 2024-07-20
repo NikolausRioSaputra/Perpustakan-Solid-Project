@@ -9,6 +9,7 @@ type BookUsecaseInterface interface {
 	AddBook
 	UpdateBook
 	DeleteBook
+	ListBooks
 }
 
 type AddBook interface {
@@ -21,6 +22,10 @@ type UpdateBook interface {
 
 type DeleteBook interface {
 	DeleteBook(book domain.Book) error
+}
+
+type ListBooks interface {
+	ListBooks() []domain.Book
 }
 
 type BookUsecaseImpl struct {
@@ -58,4 +63,12 @@ func (uc BookUsecaseImpl) DeleteBook(book domain.Book) error {
 	}
 
 	return nil
+}
+
+func (uc BookUsecaseImpl) ListBooks() []domain.Book {
+	err:= uc.bookRepo.ListBooks()
+	if err != nil {
+		return err
+	}
+	return uc.ListBooks()
 }
