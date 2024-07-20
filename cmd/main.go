@@ -21,12 +21,17 @@ func main() {
 	personUsecase := usecase.NewPersonUsecase(personRepo)
 	personHandler := handler.NewPersonHandler(personUsecase)
 
+	loanRepo := repository.NewLoanRepository()
+	loanUsecase := usecase.NewLoanUsecase(loanRepo, bookRepo, personRepo)
+	loanHandler := handler.NewLoanHandler(loanUsecase)
+
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Println("\n========== Library Management System ==========")
 		fmt.Println("1. Manage Book")
 		fmt.Println("2. Manage Person")
-		fmt.Println("3. Exit")
+		fmt.Println("3. Manage Loans")
+		fmt.Println("4. Exit")
 		fmt.Println("===============================================")
 		fmt.Println("Chose the menu: ")
 		optionStr, _ := reader.ReadString('\n')
@@ -38,6 +43,8 @@ func main() {
 		case 2:
 			managePersons(reader, personHandler)
 		case 3:
+			manageLoans(reader, loanHandler)
+		case 4:
 			fmt.Println("Exit, Thankyou")
 			return
 		default:
@@ -279,5 +286,135 @@ func listPersons(personHandler handler.PersonHandlerInterface) {
 	fmt.Println("\nPersons in library:")
 	for _, person := range persons {
 		fmt.Printf("ID: %d, Name: %s, City: %s\n", person.ID, person.Name, person.Address.City)
+	}
+}
+
+func manageLoans(reader *bufio.Reader, loanHandler handler.LaonHandlerInterface) {
+	for {
+		fmt.Println("\n========== Manage Loans ==========")
+		fmt.Println("1. Add Loan")
+		fmt.Println("2. Return Loan")
+		fmt.Println("3. List All Loans")
+		fmt.Println("4. Back to Main Menu")
+		fmt.Println("==================================")
+		fmt.Print("Choose an option: ")
+		optionStr, _ := reader.ReadString('\n')
+		option, _ := strconv.Atoi(strings.TrimSpace(optionStr))
+
+		switch option {
+		case 1:
+			addLoan(reader, loanHandler)
+		case 2:
+			returnLoan(reader, loanHandler)
+		case 3:
+			listLoans(loanHandler)
+		case 4:
+			return
+		default:
+			fmt.Println("Invalid option. Please try again.")
+		}
+	}
+}
+
+func addLoan(reader *bufio.Reader, loanHandler handler.LaonHandlerInterface) {
+	fmt.Print("Enter loan ID: ")
+	loanIDStr, _ := reader.ReadString('\n')
+	loanID, err := strconv.Atoi(strings.TrimSpace(loanIDStr))
+	if err != nil {
+		fmt.Println("Invalid loan ID: must be a positive integer")
+		return
+	}
+
+	fmt.Print("Enter book ID: ")
+	bookIDStr, _ := reader.ReadString('\n')
+	bookID, err := strconv.Atoi(strings.TrimSpace(bookIDStr))
+	if err != nil {
+		fmt.Println("Invalid book ID: must be a positive integer")
+		return
+	}
+
+	fmt.Print("Enter person ID: ")
+	personIDStr, _ := reader.ReadString('\n')
+	personID, err := strconv.Atoi(strings.TrimSpace(personIDStr))
+	if err != nil {
+		fmt.Println("Invalid person ID: must be a positive integer")
+		return
+	}
+
+	if loanHandler.IsBookLoaned(bookID) {
+		fmt.Println("Book is already loan by other.")
+		return
+	}
+
+	if loanHandler.IsPersonLoaning(personID) {
+		fmt.Println("Person already loan.")
+		return
+	}
+
+
+	fmt.Print("Enter due date: ")
+	dueDate, _ := reader.ReadString('\n')
+
+	loan := domain.Loan{
+		ID: loanID,
+		Book: domain.Book{
+			ID: bookID,
+		},
+		Person: domain.Person{
+			ID: personID,
+		},
+		DueDate:  strings.TrimSpace(dueDate),
+		Returned: false,
+	}
+
+	err = loanHandler.StoreNewLoan(loan)
+	if err != nil {
+		fmt.Println("Error adding loan:", err)
+	} else {
+		fmt.Println("Loan added successfully!")
+	}
+}
+
+func returnLoan(reader *bufio.Reader, loanHandler handler.LaonHandlerInterface) {
+	fmt.Print("Enter loan ID to return: ")
+	loanIDStr, _ := reader.ReadString('\n')
+	loanID, err := strconv.Atoi(strings.TrimSpace(loanIDStr))
+	if err != nil {
+		fmt.Println("Invalid loan ID: must be a positive integer")
+		return
+	}
+
+	// kita cari loan yang saya mau update
+	loans := loanHandler.ListLoans()
+    var loanToUpdate domain.Loan
+    found := false
+    for _, loan := range loans {
+        if loan.ID == loanID {
+            loanToUpdate = loan
+            found = true
+            break
+        }
+    }
+
+    if !found {
+        fmt.Println("Loan ID not found")
+        return
+    }
+
+	loanToUpdate.Returned = true
+	err = loanHandler.UpdateLoan(loanToUpdate)
+	if err != nil {
+		fmt.Println("Error returning loan:", err)
+	} else {
+		fmt.Println("Loan returned successfully!")
+	}
+}
+
+func listLoans(loanHandler handler.LaonHandlerInterface) {
+	loans := loanHandler.ListLoans()
+	fmt.Println("\nLoans in library:")
+	for _, loan := range loans {
+		fmt.Printf("Loan ID: %d, Book ID: %d, Person ID: %d, Due Date: %s, Returned: %t\n",
+			loan.ID, loan.Book.ID, loan.Person.ID, loan.DueDate, loan.Returned)
 	}
 }

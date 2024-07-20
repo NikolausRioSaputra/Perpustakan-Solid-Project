@@ -9,6 +9,8 @@ type LoanRepositoryInterface interface {
 	LoanSaver
 	LoanUpdater
 	LoanDeleter
+	LoanLister
+	LoanChecker
 }
 
 type LoanSaver interface {
@@ -23,9 +25,19 @@ type LoanDeleter interface {
 	DeleteLoan(loadID int) error
 }
 
+type LoanLister interface {
+	ListLoans() []domain.Loan
+}
+
+type LoanChecker interface {
+    IsBookLoaned(bookID int) bool
+    IsPersonLoaning(personID int) bool
+}
+
 type LoanRepository struct {
 	loans map[int]domain.Loan
 }
+
 
 func NewLoanRepository() LoanRepositoryInterface {
 	return &LoanRepository{
@@ -44,7 +56,11 @@ func (repo *LoanRepository) SaveLoan(loan *domain.Loan) error {
 
 func (repo *LoanRepository) UpdateLoan(loan *domain.Loan) error {
 	if _, exists := repo.loans[loan.ID]; exists{
-		repo.loans[loan.ID] = *loan
+		if loan.Returned {
+            delete(repo.loans, loan.ID)
+        } else {
+            repo.loans[loan.ID] = *loan
+        }
 		return nil
 	}
 
@@ -58,4 +74,30 @@ func (repo *LoanRepository) DeleteLoan(loanID int) error {
 
 	delete(repo.loans, loanID)
 	return nil
+}
+
+func (repo *LoanRepository) ListLoans() []domain.Loan {
+	loans := []domain.Loan{}
+	for _, loan := range repo.loans {
+		loans = append(loans, loan)
+	}
+	return loans
+}
+
+func (repo *LoanRepository) IsBookLoaned(bookID int) bool {
+    for _, loan := range repo.loans {
+        if loan.Book.ID == bookID && !loan.Returned {
+            return true
+        }
+    }
+    return false
+}
+
+func (repo *LoanRepository) IsPersonLoaning(personID int) bool {
+    for _, loan := range repo.loans {
+        if loan.Person.ID == personID && !loan.Returned {
+            return true
+        }
+    }
+    return false
 }
