@@ -6,15 +6,15 @@ import (
 )
 
 type PersonHandlerInterface interface {
-	StoreNewPerson(person domain.Person)error
+	StoreNewPerson(person domain.Person) error
 	UpdatePerson(person domain.Person) error
 	DeletePerson(person domain.Person) error
+	ListPersons() []domain.Person
 }
 
 type PersonHandler struct {
 	PersonUsecase usecase.PersonUsecaseInterface
 }
-
 
 func NewPersonHandler(personUsecase usecase.PersonUsecaseInterface) PersonHandlerInterface {
 	return PersonHandler{
@@ -33,7 +33,7 @@ func (h PersonHandler) DeletePerson(person domain.Person) error {
 
 // StoreNewPerson implements PersonHandlerInterface.
 func (h PersonHandler) StoreNewPerson(person domain.Person) error {
-	err := h.PersonUsecase.AddBook(person)
+	err := h.PersonUsecase.AddPerson(person)
 	if err != nil {
 		return err
 	}
@@ -49,3 +49,6 @@ func (h PersonHandler) UpdatePerson(person domain.Person) error {
 	return nil
 }
 
+func (h PersonHandler) ListPersons() []domain.Person {
+	return h.PersonUsecase.ListPersons()
+}

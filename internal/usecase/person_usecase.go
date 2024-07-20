@@ -9,10 +9,11 @@ type PersonUsecaseInterface interface {
 	AddPerson
 	UpdatePerson
 	DeletePerson
+	ListPersons
 }
 
 type AddPerson interface {
-	AddBook(person domain.Person) error
+	AddPerson(person domain.Person) error
 }
 
 type UpdatePerson interface {
@@ -21,6 +22,10 @@ type UpdatePerson interface {
 
 type DeletePerson interface {
 	DeletePerson(person domain.Person) error
+}
+
+type ListPersons interface {
+	ListPersons() []domain.Person
 }
 
 type PersonUsecase struct {
@@ -34,7 +39,7 @@ func NewPersonUsecase(personRepo repository.PersonRepositoryInterface) PersonUse
 }
 
 // AddBook implements PersonUsecaseInterface.
-func (uc PersonUsecase) AddBook(person domain.Person) error{
+func (uc PersonUsecase) AddPerson(person domain.Person) error {
 	err := uc.personRepo.SavaPerson(&person)
 	if err != nil {
 		return err
@@ -52,7 +57,7 @@ func (uc PersonUsecase) DeletePerson(person domain.Person) error {
 }
 
 // UpdatePerson implements PersonUsecaseInterface.
-func (uc PersonUsecase) UpdatePerson(person domain.Person) error{
+func (uc PersonUsecase) UpdatePerson(person domain.Person) error {
 	err := uc.personRepo.UpdatePerson(&person)
 	if err != nil {
 		return err
@@ -60,4 +65,6 @@ func (uc PersonUsecase) UpdatePerson(person domain.Person) error{
 	return nil
 }
 
-
+func (uc PersonUsecase) ListPersons() []domain.Person {
+	return uc.personRepo.ListPersons()
+}
