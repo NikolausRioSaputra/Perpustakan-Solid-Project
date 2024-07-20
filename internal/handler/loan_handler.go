@@ -9,6 +9,9 @@ type LaonHandlerInterface interface {
 	StoreNewLoan(loan domain.Loan) error
 	UpdateLoan(loan domain.Loan) error
 	DeleteLoan(loan domain.Loan) error
+	ListLoans() []domain.Loan
+	IsBookLoaned(bookID int) bool
+	IsPersonLoaning(personID int) bool
 }
 
 type LoanHandler struct {
@@ -46,4 +49,16 @@ func (h LoanHandler) UpdateLoan(loan domain.Loan) error {
 		return err
 	}
 	return nil
+}
+
+func (h LoanHandler) ListLoans() []domain.Loan {
+	return h.LoanUsecase.ListLoans()
+}
+
+func (h LoanHandler) IsBookLoaned(bookID int) bool {
+    return h.LoanUsecase.IsBookLoaned(bookID)
+}
+
+func (h LoanHandler) IsPersonLoaning(personID int) bool {
+    return h.LoanUsecase.IsPersonLoaning(personID)
 }

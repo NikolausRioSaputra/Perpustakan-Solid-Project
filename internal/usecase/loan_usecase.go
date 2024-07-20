@@ -9,6 +9,8 @@ type LoanUsecaseInterface interface {
 	AddLoan
 	UpdateLoan
 	DeleteLoan
+	ListLoans
+	CheckLoan
 }
 
 type AddLoan interface {
@@ -21,6 +23,15 @@ type UpdateLoan interface {
 
 type DeleteLoan interface {
 	DeleteLoan(loan domain.Loan) error
+}
+
+type ListLoans interface {
+	ListLoans() []domain.Loan
+}
+
+type CheckLoan interface {
+    IsBookLoaned(bookID int) bool
+    IsPersonLoaning(personID int) bool
 }
 
 type LoanUsecase struct {
@@ -58,4 +69,16 @@ func (uc *LoanUsecase) UpdateLoan(loan domain.Loan) error {
 		return err
 	}
 	return nil
+}
+
+func (uc LoanUsecase) ListLoans() []domain.Loan {
+	return uc.loanRepo.ListLoans()
+}
+
+func (uc *LoanUsecase) IsBookLoaned(bookID int) bool {
+    return uc.loanRepo.IsBookLoaned(bookID)
+}
+
+func (uc *LoanUsecase) IsPersonLoaning(personID int) bool {
+    return uc.loanRepo.IsPersonLoaning(personID)
 }
