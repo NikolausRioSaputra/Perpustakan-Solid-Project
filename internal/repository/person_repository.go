@@ -9,6 +9,7 @@ type PersonRepositoryInterface interface {
 	PersonSaver
 	PersonUpdate
 	PersonDelete
+	PersonLister
 }
 
 type PersonSaver interface {
@@ -23,10 +24,13 @@ type PersonDelete interface {
 	DeletePerson(personID int) error
 }
 
+type PersonLister interface {
+	ListPersons() []domain.Person
+}
+
 type PersonRepository struct {
 	persons map[int]domain.Person
 }
-
 
 func NewPersonRepository() PersonRepositoryInterface {
 	return &PersonRepository{
@@ -35,18 +39,18 @@ func NewPersonRepository() PersonRepositoryInterface {
 }
 
 // DeletePerson implements PersonRepositoryInterface.
-func (repo PersonRepository) DeletePerson(personID int) error {
+func (repo *PersonRepository) DeletePerson(personID int) error {
 	if _, exists := repo.persons[personID]; !exists {
 		return errors.New("id person not found")
 	}
 	delete(repo.persons, personID)
 	return nil
-	
+
 }
 
 // SavaPerson implements PersonRepositoryInterface.
-func (repo PersonRepository) SavaPerson(person *domain.Person) error {
-	if _,exists := repo.persons[person.ID]; exists{
+func (repo *PersonRepository) SavaPerson(person *domain.Person) error {
+	if _, exists := repo.persons[person.ID]; exists {
 		return errors.New("id person not found")
 	}
 
@@ -55,12 +59,19 @@ func (repo PersonRepository) SavaPerson(person *domain.Person) error {
 }
 
 // UpdatePerson implements PersonRepositoryInterface.
-func (repo PersonRepository) UpdatePerson(person *domain.Person) error {
-	if _,exists := repo.persons[person.ID]; exists{
+func (repo *PersonRepository) UpdatePerson(person *domain.Person) error {
+	if _, exists := repo.persons[person.ID]; exists {
 		repo.persons[person.ID] = *person
 		return nil
 	}
 
-	return  errors.New("id person not found")
+	return errors.New("id person not found")
 }
 
+func (repo *PersonRepository) ListPersons() []domain.Person {
+	persons := []domain.Person{}
+	for _, person := range repo.persons {
+		persons = append(persons, person)
+	}
+	return persons
+}

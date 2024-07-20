@@ -1,7 +1,7 @@
 package domain
 
 type Address struct {
-	Kota string
+	City string
 }
 
 type Person struct {
